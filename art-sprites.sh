@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
-
-# Rigorous error handling
 set -eo pipefail
 
 CACHE_DIR="$HOME/.cache/art_viewer"
-# The target number of images to maintain in the cache.
 INITIAL_MET_IMAGES=3  #No. of images from the METMuseum API to be maintained in the cache
 INITIAL_AIC_IMAGES=2  #No. of images from the Art Institute of Chicago API to be maintained in the cache  
 
-# --- Dependency Check ---
-# Ensures required tools are installed before running.
+# Ensures dependencies are installed
 # curl:  for API calling
 # jq:  for handling JSON
 # viu:  enables image-rendering in the terminal
@@ -26,8 +22,6 @@ check_deps() {
     exit 1
   fi
 }
-
-# --- Single Image Fetching Functions ---
 
 # Fetches one random painting from The Met.
 fetch_one_met_image() {
@@ -64,7 +58,7 @@ fetch_one_aic_image() {
     if [[ -n "$image_id" && "$image_id" != "null" ]]; then
       break
     fi
-    sleep 1 # Be polite and wait before retrying
+    sleep 1
   done
 
   # If the loop failed to find an image, abort this function.
@@ -83,9 +77,7 @@ fetch_one_aic_image() {
 }
 
 
-# --- Cache Management Functions ---
-
-# This runs silently in the background to replace a viewed image.
+# Once an image is viewed, it's deleted. A background process replaces it with another image.
 replenish_cache_in_background() {
   if (( RANDOM % 2 == 0 )); then
     fetch_one_met_image
@@ -94,7 +86,7 @@ replenish_cache_in_background() {
   fi
 }
 
-# This runs synchronously (blocking) to fill the cache from scratch.
+# Fills the cache from scratch.
 populate_initial_cache() {
   echo "Populating art cache for the first time. Please wait..."
   rm -f "$CACHE_DIR"/*
@@ -112,9 +104,7 @@ populate_initial_cache() {
   echo "Cache populated successfully."
 }
 
-# --- Main Display Logic ---
-
-# Displays a random image, deletes it, and triggers a background replacement.
+# Displays a random image, deletes it, and triggers the background process.
 display_and_replace_art() {
   local all_images=("$CACHE_DIR"/*.jpg)
   if [ ${#all_images[@]} -eq 0 ] || [ ! -f "${all_images[0]}" ]; then
@@ -140,9 +130,6 @@ display_and_replace_art() {
   rm -f "$random_image" "$metadata_file"
   (replenish_cache_in_background >/dev/null 2>&1) &
 }
-
-
-# --- Script Execution ---
 
 check_deps
 mkdir -p "$CACHE_DIR"

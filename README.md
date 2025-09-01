@@ -67,3 +67,5 @@ The project is planned to be a longterm one, which I'll keep updating whenever I
 3. **Add more public-domain sources**: Perhaps incorporate more APIs from different museums, archive.org, etc.
 
 3. See if there's a better way to **manage cache/reduce latency**.
+
+4. **Package the script** for the Arch User Repository (AUR) to simplify installation on Arch Linux.
